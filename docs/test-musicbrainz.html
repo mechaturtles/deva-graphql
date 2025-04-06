@@ -1,109 +1,142 @@
 <!DOCTYPE html>
 <html class="dark">
 <head>
-    <title>Test MusicBrainz Functions</title>
+    <title>MusicBrainz API Test Page</title>
     <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --border-color: #404040;
+            --input-bg: #2d2d2d;
+            --error-color: #ef4444;
+            --success-color: #10b981;
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 2rem;
             line-height: 1.6;
-            background-color: #1a1a1a;
-            color: #ffffff;
+            background-color: var(--bg-color);
+            color: var(--text-color);
         }
+
         .endpoint {
-            background: #2d2d2d;
-            border: 1px solid #404040;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
             border-radius: 0.5rem;
             padding: 1.5rem;
             margin-bottom: 2rem;
         }
+
         .endpoint h2 {
             margin-top: 0;
-            color: #ffffff;
+            color: var(--text-color);
             font-size: 1.25rem;
             font-weight: 600;
         }
+
         .method {
             display: inline-block;
             padding: 0.25rem 0.5rem;
-            background: #3b82f6;
+            background: var(--primary-color);
             color: white;
             border-radius: 0.25rem;
             font-weight: 500;
             margin-right: 0.5rem;
         }
+
         .path {
             font-family: monospace;
             color: #d1d5db;
         }
+
         .input-group {
             margin: 1rem 0;
         }
+
         label {
             display: block;
             margin-bottom: 0.5rem;
             color: #d1d5db;
             font-weight: 500;
         }
+
         input, textarea {
             width: 100%;
             padding: 0.5rem;
-            border: 1px solid #404040;
+            border: 1px solid var(--border-color);
             border-radius: 0.375rem;
             font-family: monospace;
-            background: #1a1a1a;
-            color: #ffffff;
+            background: var(--bg-color);
+            color: var(--text-color);
         }
+
         textarea {
             min-height: 100px;
             resize: vertical;
         }
+
         button {
             padding: 0.5rem 1rem;
-            background: #3b82f6;
+            background: var(--primary-color);
             color: white;
             border: none;
             border-radius: 0.375rem;
             cursor: pointer;
             font-weight: 500;
+            transition: background-color 0.2s;
         }
+
         button:hover {
-            background: #2563eb;
+            background: var(--primary-hover);
         }
+
         button:disabled {
             background: #4b5563;
             cursor: not-allowed;
         }
+
         pre {
             background: #000000;
-            color: #ffffff;
+            color: var(--text-color);
             padding: 1rem;
             border-radius: 0.5rem;
             overflow-x: auto;
             margin-top: 1rem;
-            border: 1px solid #404040;
+            border: 1px solid var(--border-color);
         }
+
         .response-info {
             margin-top: 1rem;
             color: #d1d5db;
             font-size: 0.875rem;
         }
+
         .error {
-            color: #ef4444;
+            color: var(--error-color);
             margin-top: 0.5rem;
             font-size: 0.875rem;
         }
+
         .loading {
-            color: #3b82f6;
+            color: var(--primary-color);
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .success {
+            color: var(--success-color);
             margin-top: 0.5rem;
             font-size: 0.875rem;
         }
     </style>
 </head>
 <body>
-    <h1>MusicBrainz API Tester</h1>
+    <h1>MusicBrainz API Test Page</h1>
     
     <div class="endpoint">
         <h2>lookupMBIDs</h2>
@@ -120,8 +153,7 @@
         
         <div class="input-group">
             <label for="mbids">MBID(s)</label>
-            <textarea id="mbids" placeholder="Enter one MBID per line">597d6d84-0316-4e7b-8649-20c576dac29f
-16456fed-c9f2-4adf-b6ea-97b648c474d2</textarea>
+            <textarea id="mbids" placeholder="Enter one MBID per line">597d6d84-0316-4e7b-8649-20c576dac29f</textarea>
             <div id="mbids-error" class="error"></div>
         </div>
         
@@ -162,97 +194,166 @@
         </div>
     </div>
 
+    <div class="endpoint">
+        <h2>scanLuceneIndexForDevaBaseFields</h2>
+        <div>
+            <span class="method">GET</span>
+            <span class="path">/ws/2/{index}?query={terms}</span>
+        </div>
+        
+        <div class="input-group">
+            <label for="scan-index">Index</label>
+            <input type="text" id="scan-index" value="artist" placeholder="e.g., artist, release, recording">
+            <div id="scan-index-error" class="error"></div>
+        </div>
+        
+        <div class="input-group">
+            <label for="scan-query">Sample Query</label>
+            <input type="text" id="scan-query" placeholder="Query to fetch a sample entity" value="name:SALES">
+            <div id="scan-query-error" class="error"></div>
+        </div>
+        
+        <button id="scan-execute-btn" onclick="testDevaScan()">Execute</button>
+        <div id="scan-loading" class="loading" style="display: none;">Loading...</div>
+        
+        <div class="response-info">
+            <div>Response:</div>
+            <pre id="scan-result">Results will appear here...</pre>
+        </div>
+    </div>
+
     <script type="module">
         import { lookupMBIDs, searchByTerms } from './musicbrainz.js';
+        import { scanLuceneIndexForDevaBaseFields } from './deva.js';
 
-        const executeBtn = document.getElementById('execute-btn');
-        const loadingEl = document.getElementById('loading');
-        const resultEl = document.getElementById('result');
-        const indexErrorEl = document.getElementById('index-error');
-        const mbidsErrorEl = document.getElementById('mbids-error');
+        // Helper function to handle loading states
+        function setLoading(element, isLoading) {
+            element.style.display = isLoading ? 'block' : 'none';
+        }
 
-        const searchExecuteBtn = document.getElementById('search-execute-btn');
-        const searchLoadingEl = document.getElementById('search-loading');
-        const searchResultEl = document.getElementById('search-result');
-        const searchIndexErrorEl = document.getElementById('search-index-error');
-        const searchTermsErrorEl = document.getElementById('search-terms-error');
+        // Helper function to handle errors
+        function handleError(error, errorElement, resultElement) {
+            const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+            errorElement.textContent = errorMessage;
+            resultElement.textContent = `Error: ${errorMessage}`;
+        }
 
+        // Helper function to clear errors
+        function clearErrors(...elements) {
+            elements.forEach(el => el.textContent = '');
+        }
+
+        // Helper function to handle button states
+        function setButtonState(button, isLoading) {
+            button.disabled = isLoading;
+        }
+
+        // Test functions
         window.testLookupMBIDs = async () => {
-            // Clear previous errors
-            indexErrorEl.textContent = '';
-            mbidsErrorEl.textContent = '';
+            const indexEl = document.getElementById('index');
+            const mbidsEl = document.getElementById('mbids');
+            const executeBtn = document.getElementById('execute-btn');
+            const loadingEl = document.getElementById('loading');
+            const resultEl = document.getElementById('result');
+            const indexErrorEl = document.getElementById('index-error');
+            const mbidsErrorEl = document.getElementById('mbids-error');
+
+            clearErrors(indexErrorEl, mbidsErrorEl);
+            setButtonState(executeBtn, true);
+            setLoading(loadingEl, true);
             resultEl.textContent = 'Loading...';
-            
-            // Disable button and show loading
-            executeBtn.disabled = true;
-            loadingEl.style.display = 'block';
 
             try {
-                const index = document.getElementById('index').value;
-                const mbids = document.getElementById('mbids').value
+                const index = indexEl.value.trim();
+                const mbids = mbidsEl.value
                     .split('\n')
                     .map(mbid => mbid.trim())
                     .filter(mbid => mbid.length > 0);
 
+                if (!index) {
+                    throw new Error('Index is required');
+                }
+                if (mbids.length === 0) {
+                    throw new Error('At least one MBID is required');
+                }
+
                 const result = await lookupMBIDs(index, mbids);
                 resultEl.textContent = JSON.stringify(result, null, 2);
             } catch (error) {
-                if (error instanceof Error) {
-                    resultEl.textContent = `Error: ${error.message}`;
-                    
-                    // Try to show validation errors in the appropriate place
-                    if (error.message.includes('Invalid index')) {
-                        indexErrorEl.textContent = error.message;
-                    } else if (error.message.includes('Invalid MBID')) {
-                        mbidsErrorEl.textContent = error.message;
-                    }
-                } else {
-                    resultEl.textContent = 'An unknown error occurred';
-                }
+                handleError(error, mbidsErrorEl, resultEl);
             } finally {
-                // Re-enable button and hide loading
-                executeBtn.disabled = false;
-                loadingEl.style.display = 'none';
+                setButtonState(executeBtn, false);
+                setLoading(loadingEl, false);
             }
         };
 
         window.testSearchByTerms = async () => {
-            // Clear previous errors
-            searchIndexErrorEl.textContent = '';
-            searchTermsErrorEl.textContent = '';
-            searchResultEl.textContent = 'Loading...';
-            
-            // Disable button and show loading
-            searchExecuteBtn.disabled = true;
-            searchLoadingEl.style.display = 'block';
+            const indexEl = document.getElementById('search-index');
+            const termsEl = document.getElementById('search-terms');
+            const executeBtn = document.getElementById('search-execute-btn');
+            const loadingEl = document.getElementById('search-loading');
+            const resultEl = document.getElementById('search-result');
+            const indexErrorEl = document.getElementById('search-index-error');
+            const termsErrorEl = document.getElementById('search-terms-error');
+
+            clearErrors(indexErrorEl, termsErrorEl);
+            setButtonState(executeBtn, true);
+            setLoading(loadingEl, true);
+            resultEl.textContent = 'Loading...';
 
             try {
-                const index = document.getElementById('search-index').value;
-                const terms = document.getElementById('search-terms').value.trim();
+                const index = indexEl.value.trim();
+                const terms = termsEl.value.trim();
 
+                if (!index) {
+                    throw new Error('Index is required');
+                }
                 if (!terms) {
-                    throw new Error('Search terms cannot be empty');
+                    throw new Error('Search terms are required');
                 }
 
                 const result = await searchByTerms(index, terms);
-                searchResultEl.textContent = JSON.stringify(result, null, 2);
+                resultEl.textContent = JSON.stringify(result, null, 2);
             } catch (error) {
-                if (error instanceof Error) {
-                    searchResultEl.textContent = `Error: ${error.message}`;
-                    
-                    // Try to show validation errors in the appropriate place
-                    if (error.message.includes('Invalid index')) {
-                        searchIndexErrorEl.textContent = error.message;
-                    } else if (error.message.includes('empty')) {
-                        searchTermsErrorEl.textContent = error.message;
-                    }
-                } else {
-                    searchResultEl.textContent = 'An unknown error occurred';
-                }
+                handleError(error, termsErrorEl, resultEl);
             } finally {
-                // Re-enable button and hide loading
-                searchExecuteBtn.disabled = false;
-                searchLoadingEl.style.display = 'none';
+                setButtonState(executeBtn, false);
+                setLoading(loadingEl, false);
+            }
+        };
+
+        window.testDevaScan = async () => {
+            const indexEl = document.getElementById('scan-index');
+            const queryEl = document.getElementById('scan-query');
+            const executeBtn = document.getElementById('scan-execute-btn');
+            const loadingEl = document.getElementById('scan-loading');
+            const resultEl = document.getElementById('scan-result');
+            const indexErrorEl = document.getElementById('scan-index-error');
+            const queryErrorEl = document.getElementById('scan-query-error');
+
+            clearErrors(indexErrorEl, queryErrorEl);
+            setButtonState(executeBtn, true);
+            setLoading(loadingEl, true);
+            resultEl.textContent = 'Loading...';
+
+            try {
+                const index = indexEl.value.trim();
+                const query = queryEl.value.trim();
+
+                if (!index) {
+                    throw new Error('Index is required');
+                }
+                if (!query) {
+                    throw new Error('Sample query is required');
+                }
+
+                const result = await scanLuceneIndexForDevaBaseFields(index, query);
+                resultEl.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                handleError(error, queryErrorEl, resultEl);
+            } finally {
+                setButtonState(executeBtn, false);
+                setLoading(loadingEl, false);
             }
         };
     </script>
