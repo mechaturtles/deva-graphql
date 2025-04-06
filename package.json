@@ -1,15 +1,30 @@
 {
   "name": "deva-graphql",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "vite build",
+    "dev": "vite docs",
+    "preview": "vite preview docs"
   },
   "keywords": [],
-  "author": "Bryce V",
+  "author": "Bryce V (https://mechaturtles.com)",
   "license": "MIT",
-  "description": "",
+  "description": "A client-side GraphQL module",
   "dependencies": {
-    "graphql": "^16.10.0"
+    "graphql": "^16.10.0",
+    "graphiql": "^2.4.7",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.8.3",
+    "vite": "^5.1.4"
   }
 }
