@@ -114,7 +114,7 @@
         
         <div class="input-group">
             <label for="index">Index</label>
-            <input type="text" id="index" value="artist" placeholder="e.g., artist, release, recording">
+            <input type="text" id="index" value="recording" placeholder="e.g., artist, release, recording">
             <div id="index-error" class="error"></div>
         </div>
         
@@ -134,14 +134,48 @@
         </div>
     </div>
 
+    <div class="endpoint">
+        <h2>searchByTerms</h2>
+        <div>
+            <span class="method">GET</span>
+            <span class="path">/ws/2/{index}?query={terms}</span>
+        </div>
+        
+        <div class="input-group">
+            <label for="search-index">Index</label>
+            <input type="text" id="search-index" value="recording" placeholder="e.g., artist, release, recording">
+            <div id="search-index-error" class="error"></div>
+        </div>
+        
+        <div class="input-group">
+            <label for="search-terms">Search Terms</label>
+            <input type="text" id="search-terms" placeholder="e.g., name:Radiohead OR name:Muse" value="artist:SALES AND recording:Seven's Day">
+            <div id="search-terms-error" class="error"></div>
+        </div>
+        
+        <button id="search-execute-btn" onclick="testSearchByTerms()">Execute</button>
+        <div id="search-loading" class="loading" style="display: none;">Loading...</div>
+        
+        <div class="response-info">
+            <div>Response:</div>
+            <pre id="search-result">Results will appear here...</pre>
+        </div>
+    </div>
+
     <script type="module">
-        import { lookupMBIDs } from './musicbrainz.js';
+        import { lookupMBIDs, searchByTerms } from './musicbrainz.js';
 
         const executeBtn = document.getElementById('execute-btn');
         const loadingEl = document.getElementById('loading');
         const resultEl = document.getElementById('result');
         const indexErrorEl = document.getElementById('index-error');
         const mbidsErrorEl = document.getElementById('mbids-error');
+
+        const searchExecuteBtn = document.getElementById('search-execute-btn');
+        const searchLoadingEl = document.getElementById('search-loading');
+        const searchResultEl = document.getElementById('search-result');
+        const searchIndexErrorEl = document.getElementById('search-index-error');
+        const searchTermsErrorEl = document.getElementById('search-terms-error');
 
         window.testLookupMBIDs = async () => {
             // Clear previous errors
@@ -179,6 +213,46 @@
                 // Re-enable button and hide loading
                 executeBtn.disabled = false;
                 loadingEl.style.display = 'none';
+            }
+        };
+
+        window.testSearchByTerms = async () => {
+            // Clear previous errors
+            searchIndexErrorEl.textContent = '';
+            searchTermsErrorEl.textContent = '';
+            searchResultEl.textContent = 'Loading...';
+            
+            // Disable button and show loading
+            searchExecuteBtn.disabled = true;
+            searchLoadingEl.style.display = 'block';
+
+            try {
+                const index = document.getElementById('search-index').value;
+                const terms = document.getElementById('search-terms').value.trim();
+
+                if (!terms) {
+                    throw new Error('Search terms cannot be empty');
+                }
+
+                const result = await searchByTerms(index, terms);
+                searchResultEl.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                if (error instanceof Error) {
+                    searchResultEl.textContent = `Error: ${error.message}`;
+                    
+                    // Try to show validation errors in the appropriate place
+                    if (error.message.includes('Invalid index')) {
+                        searchIndexErrorEl.textContent = error.message;
+                    } else if (error.message.includes('empty')) {
+                        searchTermsErrorEl.textContent = error.message;
+                    }
+                } else {
+                    searchResultEl.textContent = 'An unknown error occurred';
+                }
+            } finally {
+                // Re-enable button and hide loading
+                searchExecuteBtn.disabled = false;
+                searchLoadingEl.style.display = 'none';
             }
         };
     </script>
