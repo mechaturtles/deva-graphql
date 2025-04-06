@@ -10,7 +10,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: 'docs/index.html',
-        graphiql: 'docs/graphiql.html'
+        graphiql: 'docs/graphiql.html',
+        test: 'docs/test-musicbrainz.html'
       }
     }
   },
