@@ -1,92 +1,62 @@
 const { graphql, buildSchema } = require('graphql');
 
 // Define the schema
-const schema = buildSchema(`
-  type Query {
-    artists(where: ArtistWhereInput): [Artist]
-  }
-
-  input ArtistWhereInput {
-    id: IDFilter
-  }
-
-  input IDFilter {
-    _eq: String
-  }
-
+const schema_string = `
   type Artist {
-    id: String
-    name: String
-    release_groups: [ReleaseGroup]
+    id: ID!
+    name: String!
   }
-
-  type ReleaseGroup {
-    id: String
-    title: String
-    releases: [Release]
+  
+  type Query {
+    artists: [Artist]!
   }
-
-  type Release {
-    id: String
-    title: String
-    duration_ms: Int
-  }
-`);
+`
+const schema = buildSchema(schema_string);
 
 // Mock data
-const mockData = [
+const artists = [
   {
     id: "A1B",
-    name: "Sales",
-    release_groups: [
-      {
-        id: "R1C",
-        title: "Sales LP",
-        releases: [
-          { id: "X1Y", title: "Chinese New Year", duration_ms: 180000 },
-          { id: "X2Z", title: "Renee", duration_ms: 210000 },
-        ],
-      },
-      {
-        id: "R2D",
-        title: "Forever & Ever",
-        releases: [
-          { id: "X3W", title: "Forever & Ever", duration_ms: 200000 },
-          { id: "X4V", title: "Talk a Lot", duration_ms: 190000 },
-        ],
-      },
-    ],
+    name: "Sales"
+  }
+];
+
+const releaseGroups = [
+  {
+    id: "R1C",
+    title: "Sales LP",
+    artistId: "A1B"
   },
+  {
+    id: "R2D", 
+    title: "Forever & Ever",
+    artistId: "A1B"
+  }
+];
+
+const releases = [
+  { id: "X1Y", title: "Chinese New Year", duration_ms: 180000, releaseGroupId: "R1C" },
+  { id: "X2Z", title: "Renee", duration_ms: 210000, releaseGroupId: "R1C" },
+  { id: "X3W", title: "Forever & Ever", duration_ms: 200000, releaseGroupId: "R2D" },
+  { id: "X4V", title: "Talk a Lot", duration_ms: 190000, releaseGroupId: "R2D" }
 ];
 
 // Resolver function
 const root = {
-  artists: ({ where }) => {
-    if (where?.id?._eq) {
-      return mockData.filter((artist) => artist.id === where.id._eq);
-    }
-    return [];
+  artists() {
+    return artists;
   },
 };
 
 // Example query
 const query = `
   query {
-    artists(where: { id: { _eq: "A1B" } }) {
+    artists {
       id
       name
-      release_groups {
-        id
-        title
-        releases {
-          id
-          title
-          duration_ms
-        }
-      }
     }
   }
-`;
+`
 
 // Execute the query
 graphql({ schema, source: query, rootValue: root }).then((response) => {
