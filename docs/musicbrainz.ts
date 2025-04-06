@@ -24,7 +24,23 @@ function isValidMBID(mbid: string): boolean {
  * @returns true if the index is valid
  */
 function isValidIndex(index: string): boolean {
-    return ['artist', 'release', 'recording', 'work', 'label'].includes(index);
+    return [
+        'area',
+        'artist',
+        'event',
+        'instrument',
+        'label',
+        'place',
+        'recording',
+        'release',
+        'release-group',
+        'series',
+        'work',
+        'annotation',
+        'tag',
+        'cdstub',
+        'editor'
+    ].includes(index);
 }
 
 /**
@@ -37,7 +53,7 @@ function isValidIndex(index: string): boolean {
 export async function lookupMBIDs(index: string, mbids: string | string[]): Promise<any> {
     // Validate index
     if (!isValidIndex(index)) {
-        throw new Error(`Invalid index: ${index}. Must be one of: artist, release, recording, work, label`);
+        throw new Error(`Invalid index: ${index}. Must be one of: area, artist, event, instrument, label, place, recording, release, release-group, series, work, annotation, tag, cdstub, editor`);
     }
 
     // Normalize MBIDs to array
@@ -80,7 +96,7 @@ export async function lookupMBIDs(index: string, mbids: string | string[]): Prom
 export async function searchByTerms(index: string, terms: string): Promise<any> {
     // Validate index
     if (!isValidIndex(index)) {
-        throw new Error(`Invalid index: ${index}. Must be one of: artist, release, recording, work, label`);
+        throw new Error(`Invalid index: ${index}. Must be one of: area, artist, event, instrument, label, place, recording, release, release-group, series, work, annotation, tag, cdstub, editor`);
     }
 
     // Construct query string
