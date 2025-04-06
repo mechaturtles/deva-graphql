@@ -68,4 +68,36 @@ export async function lookupMBIDs(index: string, mbids: string | string[]): Prom
         }
         throw new Error('Failed to fetch from MusicBrainz: Unknown error');
     }
+}
+
+/**
+ * Performs a free-form search in MusicBrainz
+ * @param index The type of entity to search (artist, release, recording, etc.)
+ * @param terms The search terms to use
+ * @returns The raw response from MusicBrainz
+ * @throws Error if the request fails or if index is invalid
+ */
+export async function searchByTerms(index: string, terms: string): Promise<any> {
+    // Validate index
+    if (!isValidIndex(index)) {
+        throw new Error(`Invalid index: ${index}. Must be one of: artist, release, recording, work, label`);
+    }
+
+    // Construct query string
+    const url = `${MUSICBRAINZ_API_URL}/${index}?query=${encodeURIComponent(terms)}&fmt=json`;
+
+    try {
+        const response = await fetch(url, { headers: DEFAULT_HEADERS });
+        
+        if (!response.ok) {
+            throw new Error(`MusicBrainz API error: ${response.status} ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        if (error instanceof Error) {
+            throw new Error(`Failed to fetch from MusicBrainz: ${error.message}`);
+        }
+        throw new Error('Failed to fetch from MusicBrainz: Unknown error');
+    }
 } 
