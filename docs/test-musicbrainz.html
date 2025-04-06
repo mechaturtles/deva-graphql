@@ -133,6 +133,27 @@
             margin-top: 0.5rem;
             font-size: 0.875rem;
         }
+
+        .description {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--input-bg);
+            border-radius: 0.375rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .description p {
+            margin: 0.5rem 0;
+        }
+        
+        .description ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+        
+        .description li {
+            margin: 0.25rem 0;
+        }
     </style>
 </head>
 <body>
@@ -145,6 +166,16 @@
             <span class="path">/ws/2/{index}?query=mbid:{mbid}</span>
         </div>
         
+        <div class="description">
+            <p>This test allows you to look up MusicBrainz IDs (MBIDs) for a specific index, such as artist, release, or recording. Provide the index and one or more MBIDs to fetch the corresponding data. The example includes MBIDs for both SALES and Dance Gavin Dance.</p>
+            <ul>
+                <li>Specify the type of entity (artist, release, recording, etc.)</li>
+                <li>Enter one or more MBIDs (one per line)</li>
+                <li>Get detailed information about each entity</li>
+            </ul>
+            <p>Example: Look up both SALES and Dance Gavin Dance's artist information using their MBIDs.</p>
+        </div>
+        
         <div class="input-group">
             <label for="index">Index</label>
             <input type="text" id="index" value="artist" placeholder="e.g., artist, release, recording">
@@ -153,7 +184,8 @@
         
         <div class="input-group">
             <label for="mbids">MBID(s)</label>
-            <textarea id="mbids" placeholder="Enter one MBID per line">597d6d84-0316-4e7b-8649-20c576dac29f</textarea>
+            <textarea id="mbids" placeholder="Enter one MBID per line">597d6d84-0316-4e7b-8649-20c576dac29f
+16456fed-c9f2-4adf-b6ea-97b648c474d2</textarea>
             <div id="mbids-error" class="error"></div>
         </div>
         
@@ -171,6 +203,16 @@
         <div>
             <span class="method">GET</span>
             <span class="path">/ws/2/{index}?query={terms}</span>
+        </div>
+        
+        <div class="description">
+            <p>Search for entities using Lucene query syntax. This test allows you to:</p>
+            <ul>
+                <li>Search across different entity types (artist, release, recording, etc.)</li>
+                <li>Use advanced search operators (AND, OR, NOT)</li>
+                <li>Search by specific fields (name, country, type, etc.)</li>
+            </ul>
+            <p>Example: Search for recordings by SALES with the title "Seven's Day".</p>
         </div>
         
         <div class="input-group">
@@ -199,6 +241,16 @@
         <div>
             <span class="method">GET</span>
             <span class="path">/ws/2/{index}?query={terms}</span>
+        </div>
+        
+        <div class="description">
+            <p>Generate a schema of base fields from a sample entity. This test:</p>
+            <ul>
+                <li>Fetches a sample entity using your query</li>
+                <li>Analyzes its structure including nested fields</li>
+                <li>Returns a schema showing field names and their types</li>
+            </ul>
+            <p>Example: Generate a schema for artist entities using SALES as a sample.</p>
         </div>
         
         <div class="input-group">
@@ -358,4 +410,4 @@
         };
     </script>
 </body>
-</html> 
+</html>
