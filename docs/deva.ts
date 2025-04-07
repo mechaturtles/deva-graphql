@@ -1,5 +1,42 @@
 import { searchByTerms } from './musicbrainz';
 
+/**
+ * Scalar types supported in Deva schema
+ */
+type DevaScalarType = 'String' | 'Int' | 'Float' | 'Boolean' | 'ID';
+
+/**
+ * Field types in Deva schema, including scalars, nested objects, and arrays of nested objects
+ */
+type DevaFieldType =
+    | DevaScalarType
+    | DevaObjectSchema
+    | [DevaObjectSchema];
+
+/**
+ * Schema for a Deva object, mapping field names to their types
+ */
+type DevaObjectSchema = {
+    [fieldName: string]: DevaFieldType;
+};
+
+/**
+ * Metadata for a Deva entity, including its source index and base fields
+ */
+interface DevaEntityMetadata {
+    sourceIndex: string;
+    baseFields: DevaObjectSchema;
+}
+
+/**
+ * Schema for Deva metadata, containing all entities and their metadata
+ */
+interface DevaMetadataSchema {
+    entities: {
+        [entityName: string]: DevaEntityMetadata;
+    };
+}
+
 // Type definitions for better type safety
 type GraphQLType = 'ID' | 'String' | 'Int' | 'Float' | 'Boolean';
 
