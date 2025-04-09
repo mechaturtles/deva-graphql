@@ -211,7 +211,7 @@
     </div>
 
     <div class="endpoint">
-        <h2>searchByTerms</h2>
+        <h2>searchMusicBrainzByLuceneQuery</h2>
         <div>
             <span class="method">GET</span>
             <span class="path">/ws/2/{index}?query={terms}</span>
@@ -239,7 +239,7 @@
             <div id="search-terms-error" class="error"></div>
         </div>
         
-        <button id="search-execute-btn" onclick="testSearchByTerms()">Execute</button>
+        <button id="search-execute-btn" onclick="testSearchMusicBrainzByLuceneQuery()">Execute</button>
         <div id="search-loading" class="loading" style="display: none;">Loading...</div>
         
         <div class="response-info">
@@ -287,7 +287,7 @@
     </div>
 
     <script type="module">
-        import { lookupMBIDs, searchByTerms } from './musicbrainz.js';
+        import { lookupMBIDs, searchMusicBrainzByLuceneQuery } from './musicbrainz.js';
         import { scanLuceneIndexForDevaBaseFields } from './deva.js';
 
         // Helper function to handle loading states
@@ -351,7 +351,7 @@
             }
         };
 
-        window.testSearchByTerms = async () => {
+        window.testSearchMusicBrainzByLuceneQuery = async () => {
             const indexEl = document.getElementById('search-index');
             const termsEl = document.getElementById('search-terms');
             const executeBtn = document.getElementById('search-execute-btn');
@@ -376,7 +376,7 @@
                     throw new Error('Search terms are required');
                 }
 
-                const result = await searchByTerms(index, terms);
+                const result = await searchMusicBrainzByLuceneQuery(index, terms);
                 resultEl.textContent = JSON.stringify(result, null, 2);
             } catch (error) {
                 handleError(error, termsErrorEl, resultEl);
@@ -411,7 +411,7 @@
                     throw new Error('Sample query is required');
                 }
 
-                const result = await scanLuceneIndexForDevaBaseFields(index, query);
+                const result = await scanLuceneIndexForDevaBaseFields(index, query, searchMusicBrainzByLuceneQuery);
                 resultEl.textContent = JSON.stringify(result, null, 2);
             } catch (error) {
                 handleError(error, queryErrorEl, resultEl);
