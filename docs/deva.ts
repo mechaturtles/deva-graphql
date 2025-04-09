@@ -1,14 +1,15 @@
-import { searchByTerms } from './musicbrainz';
+// Remove the import and define a generic search function type
+export type SearchFunction = (index: string, query: string) => Promise<any>;
 
 /**
  * Scalar types supported in Deva schema
  */
-type DevaScalarType = 'String' | 'Int' | 'Float' | 'Boolean' | 'ID';
+export type DevaScalarType = 'String' | 'Int' | 'Float' | 'Boolean' | 'ID';
 
 /**
  * Field types in Deva schema, including scalars, nested objects, and arrays of nested objects
  */
-type DevaFieldType =
+export type DevaFieldType =
     | DevaScalarType
     | DevaObjectSchema
     | [DevaObjectSchema];
@@ -16,14 +17,14 @@ type DevaFieldType =
 /**
  * Schema for a Deva object, mapping field names to their types
  */
-type DevaObjectSchema = {
+export type DevaObjectSchema = {
     [fieldName: string]: DevaFieldType;
 };
 
 /**
  * Metadata for a Deva entity, including its source index and base fields
  */
-interface DevaEntityMetadata {
+export interface DevaEntityMetadata {
     sourceIndex: string;
     baseFields: DevaObjectSchema;
 }
@@ -31,20 +32,20 @@ interface DevaEntityMetadata {
 /**
  * Schema for Deva metadata, containing all entities and their metadata
  */
-interface DevaMetadataSchema {
+export interface DevaMetadataSchema {
     entities: {
         [entityName: string]: DevaEntityMetadata;
     };
 }
 
 // Type definitions for better type safety
-type GraphQLType = 'ID' | 'String' | 'Int' | 'Float' | 'Boolean';
+export type GraphQLType = 'ID' | 'String' | 'Int' | 'Float' | 'Boolean';
 
-interface NestedObject {
+export interface NestedObject {
     [key: string]: GraphQLType | NestedObject | NestedObject[];
 }
 
-interface BaseFields {
+export interface BaseFields {
     [key: string]: GraphQLType | NestedObject | NestedObject[];
 }
 
@@ -89,7 +90,7 @@ function isValidEntity(value: unknown): value is Record<string, unknown> {
  * @returns Object mapping field names to their GraphQL types or nested field structures
  * @throws Error if the entity is invalid
  */
-function extractBaseFields(entity: Record<string, unknown>): BaseFields {
+function extractDevaBaseFields(entity: Record<string, unknown>): BaseFields {
     const baseFields: BaseFields = {};
     
     for (const [key, value] of Object.entries(entity)) {
@@ -98,14 +99,14 @@ function extractBaseFields(entity: Record<string, unknown>): BaseFields {
             if (Array.isArray(value)) {
                 // Handle arrays of objects
                 if (value.length > 0 && typeof value[0] === 'object' && !Array.isArray(value[0])) {
-                    baseFields[key] = [extractBaseFields(value[0] as Record<string, unknown>)];
+                    baseFields[key] = [extractDevaBaseFields(value[0] as Record<string, unknown>)];
                 } else {
                     // Handle arrays of primitive values
                     baseFields[key] = inferGraphQLType(value[0] || '');
                 }
             } else {
                 // Handle nested objects
-                baseFields[key] = extractBaseFields(value as Record<string, unknown>);
+                baseFields[key] = extractDevaBaseFields(value as Record<string, unknown>);
             }
             continue;
         }
@@ -130,19 +131,21 @@ function extractBaseFields(entity: Record<string, unknown>): BaseFields {
  * Scans a Lucene index response to generate base fields for Deva schema
  * @param index The index to scan (e.g., 'artist', 'release', 'recording')
  * @param sampleQuery The Lucene query to fetch sample data
+ * @param searchByLuceneQuery Function that performs the search against a Lucene index
  * @returns The base fields and their types, including nested fields
  * @throws Error if no valid sample could be found
  */
 export async function scanLuceneIndexForDevaBaseFields(
     index: string,
-    sampleQuery: string
+    sampleQuery: string,
+    searchByLuceneQuery: SearchFunction
 ): Promise<BaseFields> {
     if (!index || !sampleQuery) {
         throw new Error('Index and sample query are required');
     }
 
     try {
-        const response = await searchByTerms(index, sampleQuery);
+        const response = await searchByLuceneQuery(index, sampleQuery);
 
         if (!isValidEntity(response)) {
             throw new Error('Invalid response structure');
@@ -161,7 +164,7 @@ export async function scanLuceneIndexForDevaBaseFields(
             throw new Error('Invalid sample entity structure');
         }
 
-        return extractBaseFields(sampleEntity);
+        return extractDevaBaseFields(sampleEntity);
 
     } catch (error) {
         if (error instanceof Error) {
@@ -169,4 +172,4 @@ export async function scanLuceneIndexForDevaBaseFields(
         }
         throw new Error('Failed to scan index: Unknown error');
     }
-} 
+}
